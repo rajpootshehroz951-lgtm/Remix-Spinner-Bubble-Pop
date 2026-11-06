@@ -1,0 +1,8 @@
+{
+  "name": "Remix Spinner Bubble Pop",
+  "description": "An arcade orbital bubble shooter game with 200 procedural levels, angular momentum physics, match-3 popping combos, and chain reactions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#05020f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Spinner Bubble Pop v1.1 - R.S Studio</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; }
+  html, body {
+    width: 100%; height: 100%; overflow: hidden;
+    background: #05020f;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #fff;
+    touch-action: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    overscroll-behavior: none;
+  }
+  body {
+    background: -webkit-radial-gradient(ellipse at center, #1a1040 0%, #05020f 100%);
+    background: radial-gradient(ellipse at center, #1a1040 0%, #05020f 100%);
+  }
+  #wrap {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+  }
+  #hud {
+    width: 100%; max-width: 480px;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+    justify-content: space-between;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+    padding: 10px 14px; z-index: 10;
+    font-weight: 600; letter-spacing: 0.5px;
+  }
+  .stat {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    padding: 6px 12px; border-radius: 14px;
+    font-size: 12px;
+  }
+  .stat span { color: #ffd36b; font-size: 15px; margin-left: 5px; }
+  #menuBtn {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff;
+    width: 36px; height: 36px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 18px;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    -webkit-transition: background 0.2s;
+    transition: background 0.2s;
+    outline: none;
+  }
+  #menuBtn:active { background: rgba(255,255,255,0.18); }
+  #game { display: block; background: transparent; touch-action: none; }
+  #overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    background: rgba(5,2,15,0.92);
+    z-index: 20;
+    -webkit-transition: opacity 0.4s;
+    transition: opacity 0.4s;
+    padding: 16px;
+    overflow-y: auto;
+  }
+  #overlay.hidden { opacity: 0; pointer-events: none; }
+  #overlay h1 {
+    font-size: 30px; margin-bottom: 4px;
+    background: -webkit-linear-gradient(left, #ff6ec7, #ffd36b, #6be3ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    letter-spacing: 1px;
+  }
+  #overlay h2 { font-size: 16px; margin-bottom: 10px; opacity: 0.85; font-weight: 500; }
+  #overlay p { opacity: 0.75; margin-bottom: 12px; text-align: center; padding: 0 10px; font-size: 12px; line-height: 1.5; }
+  .btn {
+    background: -webkit-linear-gradient(135deg, #ff6ec7, #8a5cff);
+    background: linear-gradient(135deg, #ff6ec7, #8a5cff);
+    border: none; color: white; font-weight: 700;
+    padding: 11px 26px; border-radius: 30px;
+    font-size: 14px; cursor: pointer;
+    -webkit-box-shadow: 0 8px 24px rgba(138,92,255,0.4);
+    box-shadow: 0 8px 24px rgba(138,92,255,0.4);
+    -webkit-transition: -webkit-transform 0.15s;
+    transition: transform 0.15s;
+    margin: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+  }
+  .btn:active { -webkit-transform: scale(0.95); transform: scale(0.95); }
+  .btn.secondary {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    -webkit-box-shadow: none;
+    box-shadow: none;
+  }
+  .btn.small { padding: 6px 14px; font-size: 12px; }
+  .btn.danger {
+    background: -webkit-linear-gradient(135deg, #ff5c8a, #c53a6a);
+    background: linear-gradient(135deg, #ff5c8a, #c53a6a);
+    -webkit-box-shadow: 0 8px 24px rgba(255,92,138,0.35);
+    box-shadow: 0 8px 24px rgba(255,92,138,0.35);
+  }
+  #levelGrid {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-wrap: wrap;
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: 320px;
+    margin: 10px 0;
+  }
+  .lvlBtn {
+    width: 18.4%;
+    padding-bottom: 18.4%;
+    margin: 0.8%;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    position: relative;
+    -webkit-transition: opacity 0.15s;
+    transition: opacity 0.15s;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+  }
+  .lvlBtn-inner {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+  }
+  .lvlBtn.unlocked { background: -webkit-linear-gradient(135deg, rgba(138,92,255,0.35), rgba(255,110,199,0.35)); background: linear-gradient(135deg, rgba(138,92,255,0.35), rgba(255,110,199,0.35)); }
+  .lvlBtn.completed { background: -webkit-linear-gradient(135deg, rgba(107,227,255,0.35), rgba(138,255,107,0.35)); background: linear-gradient(135deg, rgba(107,227,255,0.35), rgba(138,255,107,0.35)); }
+  .lvlBtn.locked { opacity: 0.3; cursor: not-allowed; }
+  .lvlBtn .star { font-size: 9px; position: absolute; bottom: 4px; }
+  .lvlBtn .tierDot {
+    position: absolute; top: 4px; right: 4px;
+    width: 5px; height: 5px; border-radius: 50%;
+  }
+  .pageNav {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+    margin: 6px 0;
+  }
+  .pageNav .pageInfo { font-size: 12px; opacity: 0.8; min-width: 80px; text-align: center; margin: 0 8px; }
+  .pageBtn {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+  }
+  .pageBtn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .tip { font-size: 11px; opacity: 0.5; margin-top: 8px; }
+  .btnRow {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+  }
+  #finalScore { color: #ffd36b; font-size: 22px; font-weight: 700; margin: 4px 0 10px; }
+  .levelBadge {
+    display: inline-block;
+    padding: 3px 10px;
+    background: rgba(255,211,107,0.2);
+    border: 1px solid rgba(255,211,107,0.4);
+    border-radius: 20px;
+    font-size: 11px;
+    color: #ffd36b;
+    margin-bottom: 6px;
+  }
+  .tierLegend {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    font-size: 10px; opacity: 0.7; margin: 4px 0;
+  }
+  .tierLegend span { display: -webkit-box; display: -webkit-flex; display: flex; -webkit-box-align: center; -webkit-align-items: center; align-items: center; margin: 2px 4px; }
+  .tierLegend i {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    margin-right: 3px;
+  }
+  .versionTag {
+    position: absolute;
+    top: 8px; right: 12px;
+    font-size: 10px;
+    opacity: 0.4;
+    letter-spacing: 1px;
+  }
+
+  /* --- Splash Screen --- */
+  #splash {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: -webkit-radial-gradient(ellipse at center, #1a1040 0%, #05020f 100%);
+    background: radial-gradient(ellipse at center, #1a1040 0%, #05020f 100%);
+    z-index: 100;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    cursor: pointer;
+    -webkit-transition: opacity 0.6s;
+    transition: opacity 0.6s;
+  }
+  #splash.hidden { opacity: 0; pointer-events: none; }
+  .splash-logo {
+    position: relative;
+    width: 180px; height: 180px;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    -webkit-animation: logoIn 1.2s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+    animation: logoIn 1.2s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  }
+  .splash-logo::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 50%;
+    background: -webkit-radial-gradient(circle, rgba(255,110,199,0.35) 0%, rgba(138,92,255,0.2) 40%, transparent 70%);
+    background: radial-gradient(circle, rgba(255,110,199,0.35) 0%, rgba(138,92,255,0.2) 40%, transparent 70%);
+    -webkit-animation: pulse 2.4s ease-in-out infinite;
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  .splash-logo::after {
+    content: '';
+    position: absolute;
+    top: -10px; left: -10px; right: -10px; bottom: -10px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,211,107,0.3);
+    -webkit-animation: ringIn 1.4s 0.3s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+    animation: ringIn 1.4s 0.3s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+  }
+  .logo-text {
+    font-size: 72px;
+    font-weight: 900;
+    letter-spacing: -3px;
+    background: -webkit-linear-gradient(135deg, #ff6ec7 0%, #ffd36b 50%, #6be3ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    position: relative;
+    z-index: 2;
+    font-family: "Segoe UI", Roboto, sans-serif;
+  }
+  .splash-studio {
+    margin-top: 18px;
+    font-size: 14px;
+    letter-spacing: 8px;
+    font-weight: 300;
+    opacity: 0;
+    -webkit-animation: fadeUp 0.8s 0.8s ease-out forwards;
+    animation: fadeUp 0.8s 0.8s ease-out forwards;
+    color: rgba(255,255,255,0.75);
+  }
+  .splash-tagline {
+    margin-top: 8px;
+    font-size: 10px;
+    letter-spacing: 3px;
+    opacity: 0;
+    -webkit-animation: fadeUp 0.8s 1.2s ease-out forwards;
+    animation: fadeUp 0.8s 1.2s ease-out forwards;
+    color: rgba(255,255,255,0.4);
+  }
+  .splash-tap {
+    position: absolute;
+    bottom: 40px;
+    font-size: 11px;
+    letter-spacing: 2px;
+    opacity: 0;
+    -webkit-animation: fadeUp 0.8s 1.8s ease-out forwards, blink 1.6s 2.6s ease-in-out infinite;
+    animation: fadeUp 0.8s 1.8s ease-out forwards, blink 1.6s 2.6s ease-in-out infinite;
+    color: rgba(255,255,255,0.5);
+  }
+  @-webkit-keyframes logoIn {
+    0% { -webkit-transform: scale(0.3) rotate(-30deg); transform: scale(0.3) rotate(-30deg); opacity: 0; }
+    100% { -webkit-transform: scale(1) rotate(0); transform: scale(1) rotate(0); opacity: 1; }
+  }
+  @keyframes logoIn {
+    0% { -webkit-transform: scale(0.3) rotate(-30deg); transform: scale(0.3) rotate(-30deg); opacity: 0; }
+    100% { -webkit-transform: scale(1) rotate(0); transform: scale(1) rotate(0); opacity: 1; }
+  }
+  @-webkit-keyframes ringIn {
+    0% { -webkit-transform: scale(0.5); transform: scale(0.5); opacity: 0; }
+    100% { -webkit-transform: scale(1); transform: scale(1); opacity: 1; }
+  }
+  @keyframes ringIn {
+    0% { -webkit-transform: scale(0.5); transform: scale(0.5); opacity: 0; }
+    100% { -webkit-transform: scale(1); transform: scale(1); opacity: 1; }
+  }
+  @-webkit-keyframes fadeUp {
+    0% { opacity: 0; -webkit-transform: translateY(10px); transform: translateY(10px); }
+    100% { opacity: 1; -webkit-transform: translateY(0); transform: translateY(0); }
+  }
+  @keyframes fadeUp {
+    0% { opacity: 0; -webkit-transform: translateY(10px); transform: translateY(10px); }
+    100% { opacity: 1; -webkit-transform: translateY(0); transform: translateY(0); }
+  }
+  @-webkit-keyframes pulse {
+    0%, 100% { -webkit-transform: scale(1); transform: scale(1); opacity: 0.8; }
+    50% { -webkit-transform: scale(1.1); transform: scale(1.1); opacity: 1; }
+  }
+  @keyframes pulse {
+    0%, 100% { -webkit-transform: scale(1); transform: scale(1); opacity: 0.8; }
+    50% { -webkit-transform: scale(1.1); transform: scale(1.1); opacity: 1; }
+  }
+  @-webkit-keyframes blink {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 0.2; }
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 0.2; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Splash Screen -->
+<div id="splash">
+  <div class="splash-logo">
+    <div class="logo-text">R.S</div>
+  </div>
+  <div class="splash-studio">STUDIO</div>
+  <div class="splash-tagline">PRESENTS</div>
+  <div class="splash-tap">TAP TO CONTINUE</div>
+</div>
+
+<div id="wrap">
+  <div id="hud">
+    <button id="menuBtn" type="button">&#9776;</button>
+    <div class="stat">Lvl<span id="levelVal">1</span></div>
+    <div class="stat">Score<span id="scoreVal">0</span></div>
+    <div class="stat">Shots<span id="shotsVal">0</span></div>
+  </div>
+  <canvas id="game"></canvas>
+  <div id="overlay"></div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // Safe Math.imul polyfill (no self-reference)
+  if (typeof Math.imul === 'undefined' || Math.imul(0xffffffff, 5) !== -5) {
+    Math.imul = function(a, b) {
+      var ah = (a >>> 16) & 0xffff;
+      var al = a & 0xffff;
+      var bh = (b >>> 16) & 0xffff;
+      var bl = b & 0xffff;
+      return (al * bl + ((ah * bl + al * bh) << 16)) | 0;
+    };
+  }
+
+  var canvas = document.getElementById('game');
+  var ctx = canvas.getContext('2d');
+  var scoreEl = document.getElementById('scoreVal');
+  var shotsEl = document.getElementById('shotsVal');
+  var levelEl = document.getElementById('levelVal');
+  var overlay = document.getElementById('overlay');
+  var menuBtn = document.getElementById('menuBtn');
+  var splash = document.getElementById('splash');
+
+  var COLORS = ['#ff5c8a', '#6be3ff', '#ffd36b', '#8aff6b', '#c58aff', '#ff9a5c'];
+  var TOTAL_LEVELS = 200;
+  var LEVELS_PER_PAGE = 20;
+  var TOTAL_PAGES = Math.ceil(TOTAL_LEVELS / LEVELS_PER_PAGE);
+  var VERSION = 'v1.1';
+
+  var W = 0, H = 0, CX = 0, CY = 0, R = 22;
+  function resize() {
+    var dpr = window.devicePixelRatio || 1;
+    var maxW = Math.min(window.innerWidth, 480);
+    var maxH = window.innerHeight;
+    canvas.style.width = maxW + 'px';
+    canvas.style.height = maxH + 'px';
+    canvas.width = Math.floor(maxW * dpr);
+    canvas.height = Math.floor(maxH * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    W = maxW; H = maxH;
+    CX = W / 2;
+    CY = H * 0.32;
+    R = Math.min(22, W / 18);
+  }
+  window.addEventListener('resize', resize);
+  window.addEventListener('orientationchange', function() {
+    setTimeout(resize, 200);
+  });
+  resize();
+
+  // Prevent default touch behaviors
+  document.addEventListener('touchmove', function(e) {
+    if (e.target === canvas || e.target === document.body) e.preventDefault();
+  }, { passive: false });
+  document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
+
+  // --- Save ---
+  var SAVE_KEY = 'spinnerPop_save_v4';
+  var save = loadSave();
+  function loadSave() {
+    try {
+      var raw = localStorage.getItem(SAVE_KEY);
+      if (raw) {
+        var s = JSON.parse(raw);
+        if (s && Array.isArray(s.completed)) return s;
+      }
+    } catch(e) {}
+    return { completed: [], bestScore: {} };
+  }
+  function persistSave() {
+    try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch(e) {}
+  }
+
+  // --- Seeded RNG ---
+  function mulberry32(seed) {
+    return function() {
+      seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+      var t = seed;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t = t ^ Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function rndColor(rng, n) { return COLORS[Math.floor(rng() * n)]; }
+
+  var ADJ = ['Swift','Wild','Crazy','Mighty','Grand','Mystic','Silent','Rapid','Fierce','Gentle',
+    'Bright','Dark','Cosmic','Lunar','Solar','Crystal','Golden','Silver','Ruby','Jade',
+    'Frozen','Blazing','Shadow','Neon','Velvet','Thunder','Iron','Emerald','Sapphire','Amber',
+    'Twisted','Smooth','Stealth','Epic','Tiny','Mega','Ultra','Hyper','Super','Omega'];
+  var NOUN = ['Spin','Pop','Burst','Loop','Ring','Wave','Storm','Flash','Pulse','Drift',
+    'Vortex','Orbit','Flux','Glide','Bounce','Twirl','Dance','Rush','Flow','Blast',
+    'Maze','Grid','Field','Zone','Realm','Peak','Edge','Core','Halo','Arc'];
+  function levelName(idx) {
+    var rng = mulberry32(idx * 9973 + 1337);
+    return ADJ[Math.floor(rng() * ADJ.length)] + ' ' + NOUN[Math.floor(rng() * NOUN.length)];
+  }
+
+  function tierColor(idx) {
+    if (idx < 20) return '#8aff6b';
+    if (idx < 50) return '#6be3ff';
+    if (idx < 100) return '#ffd36b';
+    if (idx < 150) return '#ff9a5c';
+    return '#ff5c8a';
+  }
+  function tierName(idx) {
+    if (idx < 20) return 'Beginner';
+    if (idx < 50) return 'Rising';
+    if (idx < 100) return 'Expert';
+    if (idx < 150) return 'Master';
+    return 'Legend';
+  }
+
+  // --- Pattern generators ---
+  function patternFull(rng, maxRing, nColors) {
+    var out = [{ ring: 0, slot: 0, color: rndColor(rng, nColors) }];
+    for (var r = 1; r <= maxRing; r++) {
+      var n = 6 * r;
+      for (var s = 0; s < n; s++) out.push({ ring: r, slot: s, color: rndColor(rng, nColors) });
+    }
+    return out;
+  }
+  function patternHollow(rng, maxRing, nColors) {
+    var out = [];
+    for (var r = 1; r <= maxRing; r++) {
+      var n = 6 * r;
+      for (var s = 0; s < n; s++) out.push({ ring: r, slot: s, color: rndColor(rng, nColors) });
+    }
+    return out;
+  }
+  function patternSpiral(rng, maxRing, nColors) {
+    var out = [{ ring: 0, slot: 0, color: rndColor(rng, nColors) }];
+    for (var r = 1; r <= maxRing; r++) {
+      var n = 6 * r;
+      for (var s = 0; s < n; s++) {
+        if ((s + r) % 3 === 0) out.push({ ring: r, slot: s, color: rndColor(rng, nColors) });
+      }
+    }
+    return out;
+  }
+  function patternChecker(rng, maxRing, nColors) {
+    var out = [{ ring: 0, slot: 0, color: rndColor(rng, nColors) }];
+    for (var r = 1; r <= maxRing; r++) {
+      var n = 6 * r;
+      for (var s = 0; s < n; s++) {
+        if ((s + r) % 2 === 0) out.push({ ring: r, slot: s, color: rndColor(rng, nColors) });
+      }
+    }
+    return out;
+  }
+  function patternScatter(rng, maxRing, nColors, density) {
+    var out = [{ ring: 0, slot: 0, color: rndColor(rng, nColors) }];
+    for (var r = 1; r <= maxRing; r++) {
+      var n = 6 * r;
+      for (var s = 0; s < n; s++) {
+        if (rng() < density) out.push({ ring: r, slot: s, color: rndColor(rng, nColors) });
+      }
+    }
+    return out;
+  }
+  function patternDiamond(rng, maxRing, nColors) {
+    var out = [{ ring: 0, slot: 0, color: rndColor(rng, nColors) }];
+    for (var r = 1; r <= maxRing; r++) {
+      var n = 6 * r;
+      for (var a = 0; a < 4; a++) {
+        var s = Math.round((a / 4) * n) % n;
+        out.push({ ring: r, slot: s, color: rndColor(rng, nColors) });
+        if (r > 1) out.push({ ring: r, slot: (s + 1) % n, color: rndColor(rng, nColors) });
+      }
+    }
+    return out;
+  }
+  function patternRing(rng, targetRing, nColors) {
+    var out = [];
+    var n = 6 * targetRing;
+    for (var s = 0; s < n; s++) out.push({ ring: targetRing, slot: s, color: rndColor(rng, nColors) });
+    return out;
+  }
+  function patternArms(rng, maxRing, nColors, armCount) {
+    var out = [{ ring: 0, slot: 0, color: rndColor(rng, nColors) }];
+    for (var r = 1; r <= maxRing; r++) {
+      var n = 6 * r;
+      for (var a = 0; a < armCount; a++) {
+        var s = Math.round((a / armCount) * n) % n;
+        out.push({ ring: r, slot: s, color: rndColor(rng, nColors) });
+      }
+    }
+    return out;
+  }
+
+  function generateLevel(idx) {
+    var rng = mulberry32(idx * 7919 + 42);
+    var nColors, angVel, maxRing, pattern, density;
+
+    if (idx < 20) {
+      nColors = 3;
+      angVel = 0.3 + (idx / (TOTAL_LEVELS - 1)) * 0.8;
+      maxRing = 1 + Math.floor(idx / 7);
+      var pats1 = ['full', 'hollow', 'diamond'];
+      pattern = pats1[Math.floor(rng() * pats1.length)];
+    } else if (idx < 50) {
+      nColors = 3 + Math.floor((idx - 20) / 15);
+      angVel = 0.5 + (idx - 20) / 60;
+      maxRing = 2 + Math.floor((idx - 20) / 15);
+      var pats2 = ['full', 'spiral', 'checker', 'diamond', 'arms'];
+      pattern = pats2[Math.floor(rng() * pats2.length)];
+    } else if (idx < 100) {
+      nColors = 4 + Math.floor((idx - 50) / 25);
+      angVel = 0.8 + (idx - 50) / 80;
+      maxRing = 3 + Math.floor((idx - 50) / 25);
+      var pats3 = ['full', 'spiral', 'checker', 'scatter', 'diamond', 'arms'];
+      pattern = pats3[Math.floor(rng() * pats3.length)];
+      density = 0.5 + rng() * 0.4;
+    } else if (idx < 150) {
+      nColors = 5 + Math.floor((idx - 100) / 50);
+      angVel = 1.2 + (idx - 100) / 60;
+      maxRing = 3 + Math.floor((idx - 100) / 25);
+      var pats4 = ['full', 'spiral', 'checker', 'scatter', 'arms', 'ring'];
+      pattern = pats4[Math.floor(rng() * pats4.length)];
+      density = 0.4 + rng() * 0.5;
+    } else {
+      nColors = 6;
+      angVel = 1.8 + (idx - 150) / 50;
+      maxRing = 4 + Math.floor((idx - 150) / 25);
+      var pats5 = ['full', 'spiral', 'checker', 'scatter', 'arms'];
+      pattern = pats5[Math.floor(rng() * pats5.length)];
+      density = 0.5 + rng() * 0.45;
+    }
+
+    nColors = Math.min(6, Math.max(3, nColors));
+    angVel = Math.min(3.5, Math.max(0.3, angVel));
+    maxRing = Math.min(5, Math.max(1, maxRing));
+
+    var bubbles;
+    if (pattern === 'full') bubbles = patternFull(rng, maxRing, nColors);
+    else if (pattern === 'hollow') bubbles = patternHollow(rng, maxRing, nColors);
+    else if (pattern === 'spiral') bubbles = patternSpiral(rng, maxRing, nColors);
+    else if (pattern === 'checker') bubbles = patternChecker(rng, maxRing, nColors);
+    else if (pattern === 'scatter') bubbles = patternScatter(rng, maxRing, nColors, density || 0.6);
+    else if (pattern === 'diamond') bubbles = patternDiamond(rng, maxRing, nColors);
+    else if (pattern === 'arms') bubbles = patternArms(rng, maxRing, nColors, 3 + Math.floor(rng() * 4));
+    else if (pattern === 'ring') bubbles = patternRing(rng, maxRing, nColors);
+    else bubbles = patternFull(rng, maxRing, nColors);
+
+    if (idx === 0) {
+      bubbles = [{ ring: 0, slot: 0, color: rndColor(rng, 3) }];
+      for (var s = 0; s < 6; s++) bubbles.push({ ring: 1, slot: s, color: rndColor(rng, 3) });
+      angVel = 0.3;
+    } else if (idx === TOTAL_LEVELS - 1) {
+      bubbles = patternFull(rng, 5, 6);
+      angVel = 2.2;
+    }
+
+    return { idx: idx, name: levelName(idx), colors: nColors, angVel: angVel, bubbles: bubbles };
+  }
+
+  var levelCache = {};
+  function getLevel(idx) {
+    if (!levelCache[idx]) levelCache[idx] = generateLevel(idx);
+    return levelCache[idx];
+  }
+
+  // --- Game State ---
+  var state;
+  var gameActive = false;
+  var splashDismissed = false;
+
+  function newState(levelIdx) {
+    var lvl = getLevel(levelIdx);
+    return {
+      levelIdx: levelIdx,
+      spinner: { angle: 0, angVel: lvl.angVel, bubbles: [] },
+      shooter: { angle: -Math.PI / 2, color: rndColor(Math.random, lvl.colors) },
+      flying: null,
+      particles: [],
+      score: 0,
+      shots: 0,
+      gameOver: false,
+      won: false,
+      aim: null,
+      colorPool: lvl.colors,
+      nextColors: [rndColor(Math.random, lvl.colors), rndColor(Math.random, lvl.colors), rndColor(Math.random, lvl.colors)],
+    };
+  }
+
+  function bubblePos(b, spinnerAngle) {
+    if (b.ring === 0) return { x: CX, y: CY };
+    var slotsInRing = 6 * b.ring;
+    var baseAngle = (b.slot / slotsInRing) * Math.PI * 2;
+    var r = b.ring * R * 1.82;
+    var a = baseAngle + spinnerAngle;
+    return { x: CX + Math.cos(a) * r, y: CY + Math.sin(a) * r };
+  }
+
+  function findNearestEmptySlot(px, py) {
+    var s = state.spinner;
+    var occupied = {};
+    var i;
+    for (i = 0; i < s.bubbles.length; i++) {
+      occupied[s.bubbles[i].ring + ':' + s.bubbles[i].slot] = true;
+    }
+    var best = null, bestDist = Infinity;
+    for (var ring = 1; ring <= 6; ring++) {
+      var n = 6 * ring;
+      for (var slot = 0; slot < n; slot++) {
+        var key = ring + ':' + slot;
+        if (occupied[key]) continue;
+        var p = bubblePos({ ring: ring, slot: slot }, s.angle);
+        var dx = p.x - px, dy = p.y - py;
+        var d = dx*dx + dy*dy;
+        if (d < bestDist) { bestDist = d; best = { ring: ring, slot: slot }; }
+      }
+    }
+    return best;
+  }
+
+  function getNeighbors(b) {
+    var out = [];
+    var i;
+    if (b.ring === 0) {
+      for (i = 0; i < 6; i++) out.push({ ring: 1, slot: i });
+      return out;
+    }
+    var n = 6 * b.ring;
+    out.push({ ring: b.ring, slot: (b.slot + 1) % n });
+    out.push({ ring: b.ring, slot: (b.slot - 1 + n) % n });
+    if (b.ring > 1) {
+      var innerN = 6 * (b.ring - 1);
+      var myAngle = (b.slot / n) * Math.PI * 2;
+      var s1 = Math.round((myAngle / (Math.PI * 2)) * innerN) % innerN;
+      var s2 = (s1 + 1) % innerN;
+      out.push({ ring: b.ring - 1, slot: s1 });
+      out.push({ ring: b.ring - 1, slot: s2 });
+    } else {
+      out.push({ ring: 0, slot: 0 });
+    }
+    var outerN = 6 * (b.ring + 1);
+    var myAngle2 = (b.slot / n) * Math.PI * 2;
+    var s1o = Math.round((myAngle2 / (Math.PI * 2)) * outerN) % outerN;
+    var s2o = (s1o + 1) % outerN;
+    out.push({ ring: b.ring + 1, slot: s1o });
+    out.push({ ring: b.ring + 1, slot: s2o });
+    return out;
+  }
+
+  function findBubble(ring, slot) {
+    var s = state.spinner;
+    for (var i = 0; i < s.bubbles.length; i++) {
+      if (s.bubbles[i].ring === ring && s.bubbles[i].slot === slot) return s.bubbles[i];
+    }
+    return null;
+  }
+
+  function findMatches(startBubble) {
+    var s = state.spinner;
+    var color = startBubble.color;
+    var visited = {};
+    var queue = [startBubble];
+    var keyOf = function(b) { return b.ring + ':' + b.slot; };
+    visited[keyOf(startBubble)] = true;
+    var result = [startBubble];
+    while (queue.length) {
+      var cur = queue.shift();
+      var neighbors = getNeighbors(cur);
+      for (var ni = 0; ni < neighbors.length; ni++) {
+        var nb = neighbors[ni];
+        var k = nb.ring + ':' + nb.slot;
+        if (visited[k]) continue;
+        var found = findBubble(nb.ring, nb.slot);
+        if (!found || found.color !== color) continue;
+        visited[k] = true;
+        result.push(found);
+        queue.push(found);
+      }
+    }
+    return result;
+  }
+
+  function spawnParticles(x, y, color, count) {
+    count = count || 14;
+    for (var i = 0; i < count; i++) {
+      var a = Math.random() * Math.PI * 2;
+      var sp = 80 + Math.random() * 180;
+      state.particles.push({
+        x: x, y: y,
+        vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+        life: 0.6 + Math.random() * 0.3, age: 0,
+        color: color, size: 2 + Math.random() * 3,
+      });
+    }
+  }
+
+  function shoot() {
+    if (!state || state.flying || state.gameOver || state.won || !gameActive) return;
+    var sx = CX, sy = H - 60;
+    var speed = 900;
+    state.flying = {
+      x: sx, y: sy,
+      vx: Math.cos(state.shooter.angle) * speed,
+      vy: Math.sin(state.shooter.angle) * speed,
+      color: state.shooter.color,
+    };
+    state.shots++;
+    shotsEl.textContent = state.shots;
+    state.shooter.color = state.nextColors.shift();
+    state.nextColors.push(rndColor(Math.random, state.colorPool));
+  }
+
+  var lastT = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+  function loop(t) {
+    var now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    var dt = Math.min(0.033, (now - lastT) / 1000);
+    lastT = now;
+    if (gameActive && state && !state.gameOver && !state.won) update(dt);
+    render();
+    requestAnimationFrame(loop);
+  }
+
+  function update(dt) {
+    var s = state.spinner;
+    s.angle += s.angVel * dt;
+    s.angVel *= Math.pow(0.7, dt);
+    if (Math.abs(s.angVel) < 0.02) s.angVel *= 0.9;
+
+    var f = state.flying;
+    if (f) {
+      f.x += f.vx * dt;
+      f.y += f.vy * dt;
+      if (f.x < R) { f.x = R; f.vx = -f.vx; spawnParticles(f.x, f.y, f.color, 5); }
+      if (f.x > W - R) { f.x = W - R; f.vx = -f.vx; spawnParticles(f.x, f.y, f.color, 5); }
+      if (f.y < R) {
+        state.flying = null;
+      } else {
+        var hit = null, hitDist = Infinity;
+        for (var i = 0; i < s.bubbles.length; i++) {
+          var b = s.bubbles[i];
+          var p = bubblePos(b, s.angle);
+          var dx = p.x - f.x, dy = p.y - f.y;
+          var d2 = dx*dx + dy*dy;
+          var minD = R * 1.85;
+          if (d2 < minD * minD && d2 < hitDist) { hitDist = d2; hit = b; }
+        }
+        if (hit) {
+          attachBubble(f, hit);
+          state.flying = null;
+        }
+      }
+    }
+
+    var newParticles = [];
+    for (var pi = 0; pi < state.particles.length; pi++) {
+      var p = state.particles[pi];
+      p.age += dt;
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      p.vx *= 0.92; p.vy *= 0.92;
+      p.vy += 200 * dt;
+      if (p.age < p.life) newParticles.push(p);
+    }
+    state.particles = newParticles;
+
+    for (var bi = 0; bi < s.bubbles.length; bi++) {
+      var bp = bubblePos(s.bubbles[bi], s.angle);
+      if (bp.y > H - 100) {
+        state.gameOver = true;
+        showGameOver();
+        return;
+      }
+    }
+
+    if (s.bubbles.length === 0) {
+      state.won = true;
+      showLevelComplete();
+    }
+  }
+
+  function attachBubble(flying, hitBubble) {
+    var s = state.spinner;
+    var slot = findNearestEmptySlot(flying.x, flying.y);
+    if (!slot) return;
+    var newB = { ring: slot.ring, slot: slot.slot, color: flying.color };
+    s.bubbles.push(newB);
+
+    var p = bubblePos(newB, s.angle);
+    var rx = p.x - CX, ry = p.y - CY;
+    var cross = rx * flying.vy - ry * flying.vx;
+    s.angVel += cross * 0.000012;
+    if (s.angVel > 12) s.angVel = 12;
+    if (s.angVel < -12) s.angVel = -12;
+
+    var matches = findMatches(newB);
+    if (matches.length >= 3) {
+      for (var mi = 0; mi < matches.length; mi++) {
+        var mp = bubblePos(matches[mi], s.angle);
+        spawnParticles(mp.x, mp.y, matches[mi].color, 10);
+      }
+      var matchKeys = {};
+      for (var mi2 = 0; mi2 < matches.length; mi2++) {
+        matchKeys[matches[mi2].ring + ':' + matches[mi2].slot] = true;
+      }
+      var newBubbles = [];
+      for (var bi = 0; bi < s.bubbles.length; bi++) {
+        var key = s.bubbles[bi].ring + ':' + s.bubbles[bi].slot;
+        if (!matchKeys[key]) newBubbles.push(s.bubbles[bi]);
+      }
+      s.bubbles = newBubbles;
+      state.score += matches.length * 10 + (matches.length - 3) * 20;
+      scoreEl.textContent = state.score;
+      removeFloating();
+    }
+  }
+
+  function removeFloating() {
+    var s = state.spinner;
+    var hasCenter = false;
+    var i;
+    for (i = 0; i < s.bubbles.length; i++) {
+      if (s.bubbles[i].ring === 0) { hasCenter = true; break; }
+    }
+    if (!hasCenter) return;
+    var visited = {};
+    var queue = [];
+    var center = null;
+    for (i = 0; i < s.bubbles.length; i++) {
+      if (s.bubbles[i].ring === 0) { center = s.bubbles[i]; break; }
+    }
+    queue.push(center);
+    visited['0:0'] = true;
+    while (queue.length) {
+      var cur = queue.shift();
+      var neighbors = getNeighbors(cur);
+      for (var ni = 0; ni < neighbors.length; ni++) {
+        var nb = neighbors[ni];
+        var k = nb.ring + ':' + nb.slot;
+        if (visited[k]) continue;
+        var found = findBubble(nb.ring, nb.slot);
+        if (!found) continue;
+        visited[k] = true;
+        queue.push(found);
+      }
+    }
+    var toRemove = [];
+    var toKeep = [];
+    for (i = 0; i < s.bubbles.length; i++) {
+      var key = s.bubbles[i].ring + ':' + s.bubbles[i].slot;
+      if (visited[key]) toKeep.push(s.bubbles[i]);
+      else toRemove.push(s.bubbles[i]);
+    }
+    if (toRemove.length) {
+      for (var ri = 0; ri < toRemove.length; ri++) {
+        var rp = bubblePos(toRemove[ri], s.angle);
+        spawnParticles(rp.x, rp.y, toRemove[ri].color, 6);
+      }
+      s.bubbles = toKeep;
+      state.score += toRemove.length * 15;
+      scoreEl.textContent = state.score;
+    }
+  }
+
+  // --- Render ---
+  function render() {
+    if (!state) return;
+    ctx.clearRect(0, 0, W, H);
+    var grad = ctx.createRadialGradient(CX, CY, 20, CX, CY, Math.max(W, H) * 0.6);
+    grad.addColorStop(0, 'rgba(138,92,255,0.18)');
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.strokeStyle = 'rgba(255,90,130,0.25)';
+    ctx.setLineDash([6, 8]);
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(0, H - 100);
+    ctx.lineTo(W, H - 100);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    var s = state.spinner;
+    var i;
+    for (i = 0; i < s.bubbles.length; i++) {
+      var p = bubblePos(s.bubbles[i], s.angle);
+      drawBubble(p.x, p.y, s.bubbles[i].color);
+    }
+
+    if (state.flying) {
+      var f = state.flying;
+      ctx.globalAlpha = 0.3;
+      drawBubble(f.x - f.vx * 0.01, f.y - f.vy * 0.01, f.color, 0.8);
+      ctx.globalAlpha = 0.15;
+      drawBubble(f.x - f.vx * 0.02, f.y - f.vy * 0.02, f.color, 0.6);
+      ctx.globalAlpha = 1;
+      drawBubble(f.x, f.y, f.color);
+    }
+
+    for (var pi = 0; pi < state.particles.length; pi++) {
+      var pt = state.particles[pi];
+      var a = 1 - pt.age / pt.life;
+      ctx.globalAlpha = a;
+      ctx.fillStyle = pt.color;
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    var sy = H - 60;
+    var aimAngle = state.shooter.angle;
+    if (state.aim && !state.flying && !state.gameOver && !state.won && gameActive) {
+      var dx = state.aim.x - CX;
+      var dy = state.aim.y - sy;
+      if (dy < -10) {
+        aimAngle = Math.atan2(dy, dx);
+        if (aimAngle > -0.15) aimAngle = -0.15;
+        if (aimAngle < -Math.PI + 0.15) aimAngle = -Math.PI + 0.15;
+        state.shooter.angle = aimAngle;
+      }
+    }
+
+    if (!state.flying && !state.gameOver && !state.won && gameActive) {
+      drawTrajectory(CX, sy, aimAngle, state.shooter.color);
+    }
+
+    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+    ctx.beginPath();
+    ctx.arc(CX, sy, R * 2.2, 0, Math.PI * 2);
+    ctx.fill();
+    if (!state.gameOver && !state.won && gameActive) drawBubble(CX, sy, state.shooter.color, 1.1);
+    if (gameActive) {
+      for (i = 0; i < state.nextColors.length; i++) {
+        var nx = CX - 60 + i * 30;
+        var ny = H - 20;
+        drawBubble(nx, ny, state.nextColors[i], 0.55);
+      }
+    }
+  }
+
+  function drawBubble(x, y, color, scale) {
+    scale = scale || 1;
+    var r = R * scale;
+    var g = ctx.createRadialGradient(x - r*0.3, y - r*0.3, r*0.1, x, y, r);
+    g.addColorStop(0, lighten(color, 0.4));
+    g.addColorStop(0.6, color);
+    g.addColorStop(1, darken(color, 0.3));
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.beginPath();
+    ctx.arc(x - r*0.35, y - r*0.35, r*0.25, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function drawTrajectory(sx, sy, angle, color) {
+    var x = sx, y = sy;
+    var vx = Math.cos(angle), vy = Math.sin(angle);
+    var steps = 60;
+    var step = 8;
+    ctx.strokeStyle = color;
+    ctx.globalAlpha = 0.35;
+    ctx.lineWidth = 2;
+    ctx.setLineDash([2, 6]);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    for (var i = 0; i < steps; i++) {
+      x += vx * step; y += vy * step;
+      if (x < R) { x = R; vx = -vx; }
+      if (x > W - R) { x = W - R; vx = -vx; }
+      if (y < R) break;
+      ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.globalAlpha = 1;
+  }
+
+  function shade(hex, amt) {
+    var c = hex.replace('#','');
+    var r = parseInt(c.substr(0,2),16);
+    var g = parseInt(c.substr(2,2),16);
+    var b = parseInt(c.substr(4,2),16);
+    var f = amt >= 0 ? amt : -amt;
+    var nr, ng, nb;
+    if (amt >= 0) {
+      nr = Math.round(r + (255-r)*f);
+      ng = Math.round(g + (255-g)*f);
+      nb = Math.round(b + (255-b)*f);
+    } else {
+      nr = Math.round(r*(1-f));
+      ng = Math.round(g*(1-f));
+      nb = Math.round(b*(1-f));
+    }
+    return 'rgb(' + nr + ',' + ng + ',' + nb + ')';
+  }
+  function lighten(hex, amt) { return shade(hex, amt); }
+  function darken(hex, amt) { return shade(hex, -amt); }
+
+  // --- Input ---
+  function getPos(e) {
+    var rect = canvas.getBoundingClientRect();
+    var t;
+    if (e.touches && e.touches.length > 0) {
+      t = e.touches[0];
+    } else if (e.changedTouches && e.changedTouches.length > 0) {
+      t = e.changedTouches[0];
+    } else {
+      t = e;
+    }
+    return { x: t.clientX - rect.left, y: t.clientY - rect.top };
+  }
+
+  canvas.addEventListener('mousemove', function(e) { state.aim = getPos(e); });
+  canvas.addEventListener('touchmove', function(e) { e.preventDefault(); state.aim = getPos(e); }, { passive: false });
+  canvas.addEventListener('mousedown', function(e) { state.aim = getPos(e); });
+  canvas.addEventListener('touchstart', function(e) { e.preventDefault(); state.aim = getPos(e); }, { passive: false });
+  canvas.addEventListener('mouseup', function() {
+    if (state.aim && state.aim.y < H - 100) shoot();
+  });
+  canvas.addEventListener('touchend', function(e) {
+    e.preventDefault();
+    if (state.aim && state.aim.y < H - 100) shoot();
+    state.aim = null;
+  }, { passive: false });
+  canvas.addEventListener('touchcancel', function() { state.aim = null; });
+  canvas.addEventListener('mouseleave', function() { state.aim = null; });
+
+  // --- Overlays ---
+  var currentPage = 0;
+
+  function getNextUnlocked() {
+    if (save.completed.length === 0) return 0;
+    var maxDone = save.completed[0];
+    for (var i = 1; i < save.completed.length; i++) {
+      if (save.completed[i] > maxDone) maxDone = save.completed[i];
+    }
+    return Math.min(maxDone + 1, TOTAL_LEVELS - 1);
+  }
+
+  function isUnlocked(idx) {
+    if (idx === 0) return true;
+    for (var i = 0; i < save.completed.length; i++) {
+      if (save.completed[i] === idx - 1 || save.completed[i] === idx) return true;
+    }
+    return false;
+  }
+
+  function isCompleted(idx) {
+    for (var i = 0; i < save.completed.length; i++) {
+      if (save.completed[i] === idx) return true;
+    }
+    return false;
+  }
+
+  function showMenu() {
+    gameActive = false;
+    overlay.innerHTML = '<div class="versionTag">' + VERSION + '</div>' +
+      '<h1>Spinner Pop</h1>' +
+      '<div class="levelBadge">' + TOTAL_LEVELS + ' Levels</div>' +
+      '<p>Aim &amp; shoot bubbles at the spinning cluster.<br>' +
+         'Match 3+ of the same color to pop them.<br>' +
+         'Off-center hits make the spinner spin wild!</p>' +
+      '<div class="tierLegend">' +
+        '<span><i style="background:#8aff6b"></i>Beginner</span>' +
+        '<span><i style="background:#6be3ff"></i>Rising</span>' +
+        '<span><i style="background:#ffd36b"></i>Expert</span>' +
+        '<span><i style="background:#ff9a5c"></i>Master</span>' +
+        '<span><i style="background:#ff5c8a"></i>Legend</span>' +
+      '</div>' +
+      '<div class="btnRow">' +
+        '<button class="btn" id="playBtn" type="button">Play</button>' +
+        '<button class="btn secondary" id="levelsBtn" type="button">Levels</button>' +
+      '</div>' +
+      '<div class="tip">Drag to aim &bull; Release to shoot</div>' +
+      '<div style="margin-top:16px;font-size:10px;opacity:0.35;letter-spacing:2px">R.S STUDIO &bull; ' + VERSION + '</div>';
+    overlay.classList.remove('hidden');
+    document.getElementById('playBtn').addEventListener('click', function(e) {
+      e.preventDefault();
+      startLevel(getNextUnlocked());
+    });
+    document.getElementById('levelsBtn').addEventListener('click', function(e) {
+      e.preventDefault();
+      currentPage = Math.floor(getNextUnlocked() / LEVELS_PER_PAGE);
+      showLevelSelect();
+    });
+  }
+
+  function showLevelSelect() {
+    gameActive = false;
+    var start = currentPage * LEVELS_PER_PAGE;
+    var end = Math.min(start + LEVELS_PER_PAGE, TOTAL_LEVELS);
+    var grid = '';
+    for (var i = start; i < end; i++) {
+      var done = isCompleted(i);
+      var unlocked = isUnlocked(i);
+      var cls = done ? 'completed' : (unlocked ? 'unlocked' : 'locked');
+      var star = done ? '<div class="star">&#9733;</div>' : '';
+      var tierDot = '<div class="tierDot" style="background:' + tierColor(i) + '"></div>';
+      grid += '<button class="lvlBtn ' + cls + '" data-lvl="' + i + '" type="button"><div class="lvlBtn-inner">' + (i+1) + star + tierDot + '</div></button>';
+    }
+    overlay.innerHTML = '<div class="versionTag">' + VERSION + '</div>' +
+      '<h1>Select Level</h1>' +
+      '<div class="levelBadge" style="margin-bottom:6px">Tier: ' + tierName(currentPage * LEVELS_PER_PAGE) + ' &bull; ' + save.completed.length + '/' + TOTAL_LEVELS + ' cleared</div>' +
+      '<div class="pageNav">' +
+        '<button class="pageBtn" id="prevPage" type="button"' + (currentPage === 0 ? ' disabled' : '') + '>&lsaquo;</button>' +
+        '<div class="pageInfo">Page ' + (currentPage + 1) + ' / ' + TOTAL_PAGES + '</div>' +
+        '<button class="pageBtn" id="nextPage" type="button"' + (currentPage >= TOTAL_PAGES - 1 ? ' disabled' : '') + '>&rsaquo;</button>' +
+      '</div>' +
+      '<div id="levelGrid">' + grid + '</div>' +
+      '<div class="btnRow">' +
+        '<button class="btn secondary small" id="backBtn" type="button">Back</button>' +
+      '</div>';
+    overlay.classList.remove('hidden');
+    document.getElementById('backBtn').addEventListener('click', function(e) { e.preventDefault(); showMenu(); });
+    var prevBtn = document.getElementById('prevPage');
+    var nextBtn = document.getElementById('nextPage');
+    if (prevBtn) prevBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (currentPage > 0) { currentPage--; showLevelSelect(); }
+    });
+    if (nextBtn) nextBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (currentPage < TOTAL_PAGES - 1) { currentPage++; showLevelSelect(); }
+    });
+    var btns = overlay.querySelectorAll('.lvlBtn');
+    for (var bi = 0; bi < btns.length; bi++) {
+      btns[bi].addEventListener('click', function(e) {
+        e.preventDefault();
+        var idx = parseInt(this.getAttribute('data-lvl'));
+        if (isUnlocked(idx)) startLevel(idx);
+      });
+    }
+  }
+
+  function showPauseMenu() {
+    gameActive = false;
+    overlay.innerHTML = '<div class="versionTag">' + VERSION + '</div>' +
+      '<h1>Paused</h1>' +
+      '<h2>' + getLevel(state.levelIdx).name + '</h2>' +
+      '<p>Level ' + (state.levelIdx + 1) + ' &bull; Score: ' + state.score + '</p>' +
+      '<div class="btnRow">' +
+        '<button class="btn" id="resumeBtn" type="button">Resume</button>' +
+      '</div>' +
+      '<div class="btnRow">' +
+        '<button class="btn secondary" id="restartBtn" type="button">Restart Level</button>' +
+        '<button class="btn secondary" id="lvlSelectBtn" type="button">Level Select</button>' +
+      '</div>' +
+      '<div class="btnRow">' +
+        '<button class="btn danger" id="mainMenuBtn" type="button">Main Menu</button>' +
+      '</div>';
+    overlay.classList.remove('hidden');
+    document.getElementById('resumeBtn').addEventListener('click', function(e) {
+      e.preventDefault();
+      overlay.classList.add('hidden');
+      gameActive = true;
+    });
+    document.getElementById('restartBtn').addEventListener('click', function(e) { e.preventDefault(); startLevel(state.levelIdx); });
+    document.getElementById('lvlSelectBtn').addEventListener('click', function(e) {
+      e.preventDefault();
+      currentPage = Math.floor(state.levelIdx / LEVELS_PER_PAGE);
+      showLevelSelect();
+    });
+    document.getElementById('mainMenuBtn').addEventListener('click', function(e) { e.preventDefault(); showMenu(); });
+  }
+
+  function showLevelComplete() {
+    gameActive = false;
+    var lvlIdx = state.levelIdx;
+    var alreadyDone = false;
+    for (var i = 0; i < save.completed.length; i++) {
+      if (save.completed[i] === lvlIdx) { alreadyDone = true; break; }
+    }
+    if (!alreadyDone) save.completed.push(lvlIdx);
+    var prevBest = save.bestScore[lvlIdx] || 0;
+    if (state.score > prevBest) save.bestScore[lvlIdx] = state.score;
+    persistSave();
+
+    var isLast = lvlIdx >= TOTAL_LEVELS - 1;
+    var nextUnlocked = Math.min(lvlIdx + 1, TOTAL_LEVELS - 1);
+
+    setTimeout(function() {
+      overlay.innerHTML = '<div class="versionTag">' + VERSION + '</div>' +
+        '<h1>' + (isLast ? '&#127942; You Beat the Game!' : 'Level Complete!') + '</h1>' +
+        '<h2>' + getLevel(lvlIdx).name + '</h2>' +
+        '<div id="finalScore">' + state.score + '</div>' +
+        '<p>Shots used: ' + state.shots + '</p>' +
+        '<div class="btnRow">' +
+          (!isLast ? '<button class="btn" id="nextBtn" type="button">Next Level</button>' : '') +
+          '<button class="btn secondary" id="replayBtn" type="button">Replay</button>' +
+        '</div>' +
+        '<div class="btnRow">' +
+          '<button class="btn secondary" id="lvlSelectBtn" type="button">Level Select</button>' +
+          '<button class="btn danger" id="mainMenuBtn" type="button">Main Menu</button>' +
+        '</div>';
+      overlay.classList.remove('hidden');
+      if (!isLast) {
+        document.getElementById('nextBtn').addEventListener('click', function(e) { e.preventDefault(); startLevel(nextUnlocked); });
+      }
+      document.getElementById('replayBtn').addEventListener('click', function(e) { e.preventDefault(); startLevel(lvlIdx); });
+      document.getElementById('lvlSelectBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        currentPage = Math.floor(lvlIdx / LEVELS_PER_PAGE);
+        showLevelSelect();
+      });
+      document.getElementById('mainMenuBtn').addEventListener('click', function(e) { e.preventDefault(); showMenu(); });
+    }, 600);
+  }
+
+  function showGameOver() {
+    gameActive = false;
+    setTimeout(function() {
+      overlay.innerHTML = '<div class="versionTag">' + VERSION + '</div>' +
+        '<h1>Game Over</h1>' +
+        '<h2>' + getLevel(state.levelIdx).name + '</h2>' +
+        '<div id="finalScore">' + state.score + '</div>' +
+        '<p>Shots used: ' + state.shots + '</p>' +
+        '<div class="btnRow">' +
+          '<button class="btn" id="retryBtn" type="button">Retry</button>' +
+          '<button class="btn secondary" id="lvlSelectBtn" type="button">Level Select</button>' +
+        '</div>' +
+        '<div class="btnRow">' +
+          '<button class="btn danger" id="mainMenuBtn" type="button">Main Menu</button>' +
+        '</div>';
+      overlay.classList.remove('hidden');
+      document.getElementById('retryBtn').addEventListener('click', function(e) { e.preventDefault(); startLevel(state.levelIdx); });
+      document.getElementById('lvlSelectBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        currentPage = Math.floor(state.levelIdx / LEVELS_PER_PAGE);
+        showLevelSelect();
+      });
+      document.getElementById('mainMenuBtn').addEventListener('click', function(e) { e.preventDefault(); showMenu(); });
+    }, 500);
+  }
+
+  function startLevel(idx) {
+    state = newState(idx);
+    var lvl = getLevel(idx);
+    state.spinner.bubbles = [];
+    for (var i = 0; i < lvl.bubbles.length; i++) {
+      var b = lvl.bubbles[i];
+      state.spinner.bubbles.push({ ring: b.ring, slot: b.slot, color: b.color });
+    }
+    scoreEl.textContent = '0';
+    shotsEl.textContent = '0';
+    levelEl.textContent = idx + 1;
+    overlay.classList.add('hidden');
+    gameActive = true;
+  }
+
+  // --- Menu button ---
+  menuBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    if (gameActive && state && !state.gameOver && !state.won) {
+      showPauseMenu();
+    } else {
+      showMenu();
+    }
+  });
+
+  // --- Splash screen ---
+  var splashHandled = false;
+  function dismissSplash() {
+    if (splashHandled) return;
+    splashHandled = true;
+    splashDismissed = true;
+    splash.classList.add('hidden');
+    setTimeout(function() {
+      try { splash.style.display = 'none'; } catch(e) {}
+    }, 700);
+    showMenu();
+  }
+  splash.addEventListener('click', dismissSplash);
+  splash.addEventListener('touchstart', function(e) { e.preventDefault(); dismissSplash(); }, { passive: false });
+  setTimeout(function() {
+    if (!splashDismissed) dismissSplash();
+  }, 3500);
+
+  // --- Boot ---
+  state = newState(0);
+  var firstLvl = getLevel(0);
+  state.spinner.bubbles = [];
+  for (var bi = 0; bi < firstLvl.bubbles.length; bi++) {
+    var b = firstLvl.bubbles[bi];
+    state.spinner.bubbles.push({ ring: b.ring, slot: b.slot, color: b.color });
+  }
+  overlay.classList.add('hidden');
+  if (typeof requestAnimationFrame !== 'undefined') {
+    requestAnimationFrame(loop);
+  } else {
+    setInterval(function() { loop(Date.now()); }, 16);
+  }
+})();
+</script>
+</body>
+</html>
